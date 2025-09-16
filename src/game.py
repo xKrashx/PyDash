@@ -1,5 +1,6 @@
 import pygame
 
+from src.images import PLAYER_IMAGE
 from src.constants import RED, SCREEN_SIZE
 
 class Game:
@@ -8,6 +9,7 @@ class Game:
 
         self.screen = pygame.display.set_mode(SCREEN_SIZE)
         pygame.display.set_caption('Pydash: Geometry Dash in Python')
+        pygame.display.set_icon(PLAYER_IMAGE)
 
         self.clock = pygame.time.Clock()
 
