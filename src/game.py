@@ -1,7 +1,7 @@
 import pygame
 
-from src.images import PLAYER_IMAGE
-from src.constants import RED, SCREEN_SIZE
+from src.images import PLAYER_IMAGE, BACKGROUND_IMAGE
+from src.constants import SCREEN_SIZE
 from src.player import Player
 
 class Game:
@@ -29,7 +29,7 @@ class Game:
 
             if keys[pygame.K_SPACE]: self.player.jump()
 
-            self.screen.fill(RED)
+            self.screen.blit(BACKGROUND_IMAGE, (0, 0))
             self.player.draw_particle_trail(self.screen)
 
             self.player_sprite.update()
