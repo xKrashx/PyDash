@@ -1,6 +1,5 @@
 import pygame
 
-from src.images import PLAYER_IMAGE, BACKGROUND_IMAGE
 from src.constants import SCREEN_SIZE
 from src.player import Player
 
@@ -9,15 +8,20 @@ class Game:
         pygame.init()
 
         self.screen = pygame.display.set_mode(SCREEN_SIZE)
+
+        from src.images import PLAYER_IMAGE
+
         pygame.display.set_caption('Pydash: Geometry Dash in Python')
         pygame.display.set_icon(PLAYER_IMAGE)
 
         self.player_sprite = pygame.sprite.Group()
 
         self.clock = pygame.time.Clock()
-        self.player = Player(self.player_sprite)
+        self.player = Player(PLAYER_IMAGE, self.player_sprite)
 
     def run(self):
+        from src.images import BACKGROUND_IMAGE
+
         done = False
         angle = 0
 

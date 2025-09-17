@@ -4,14 +4,13 @@ import random
 from pygame.math import Vector2
 
 from src.constants import WHITE, GRAVITY, MAX_VELOCITY, SCREEN_SIZE
-from src.images import PLAYER_IMAGE
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, *groups):
+    def __init__(self, image: pygame.Surface, *groups):
         super().__init__(*groups)
         self.position = [66, 0]
 
-        self.image = pygame.transform.smoothscale(PLAYER_IMAGE, (32, 32))
+        self.image = image
         self.rect = self.image.get_rect(center=self.position)
         self.jump_amount = 10
         self.particles = []
