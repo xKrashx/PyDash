@@ -11,4 +11,5 @@ def load_image(path: str, size: tuple[int, int]) -> pygame.image:
 
 PLAYER_IMAGE = load_image("resources/images/avatar.png", SPRITE_SIZE)
 SPIKE_IMAGE = load_image("resources/images/spike.png", SPRITE_SIZE)
+BLOCK_IMAGE = load_image("resources/images/block.png", SPRITE_SIZE)
 BACKGROUND_IMAGE = load_image("resources/images/background.png", SCREEN_SIZE)

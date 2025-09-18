@@ -1,9 +1,11 @@
 import pygame
+import math
 
 from src.constants import SCREEN_SIZE
 from src.obstacle import Obstacle
 from src.player import Player
 from src.spike import Spike
+from src.block import Block
 
 class Game:
     def __init__(self):
@@ -55,10 +57,13 @@ class Game:
         self.restart()
 
     def run(self):
-        from src.images import BACKGROUND_IMAGE, SPIKE_IMAGE
+        from src.images import BACKGROUND_IMAGE, SPIKE_IMAGE, BLOCK_IMAGE
 
         obstacles = pygame.sprite.Group()
         self.obstacles = [ Spike(SPIKE_IMAGE, (500, SCREEN_SIZE[1] - 32), obstacles) ]
+
+        for i in range(math.ceil(SCREEN_SIZE[0] / 32)):
+            self.obstacles.append(Block(BLOCK_IMAGE, (i * 32, SCREEN_SIZE[1] - 32), obstacles))
 
         self.restart()
 
