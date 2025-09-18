@@ -16,6 +16,7 @@ class Player(pygame.sprite.Sprite):
         self.jump_amount = 10
         self.particles = []
         self.is_jumping = False
+        self.is_dead = False
         self.vel = Vector2(6, 0)
 
     def draw_particle_trail(self, surface: pygame.Surface, color=WHITE):
@@ -40,6 +41,9 @@ class Player(pygame.sprite.Sprite):
 
     def rotate(self):
         self.rotation_angle -= ROTATION_ANGLE
+
+    def died(self):
+        self.is_dead = True
 
     def update(self):
         self.vel.y = min(self.vel.y + GRAVITY, MAX_VELOCITY)
