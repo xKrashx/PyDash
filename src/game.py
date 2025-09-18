@@ -20,36 +20,36 @@ class Game:
         self.clock = pygame.time.Clock()
         self.player = Player(PLAYER_IMAGE, self.player_sprite)
 
+    def update(self):
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE]: self.player.jump()
+
+        if self.player.is_jumping: self.player.rotate()
+
+        for obstacle in self.obstacles:
+            obstacle.move(pygame.math.Vector2(-self.player.vel.x, 0))
+
+    # TODO: Fix this nonsense
+    def check_window_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE): return True
+        return False
+
     def run(self):
         from src.images import BACKGROUND_IMAGE, SPIKE_IMAGE
-
-        done = False
-        angle = 0
 
         obstacles = pygame.sprite.Group()
         self.obstacles = [ Spike(SPIKE_IMAGE, (500, SCREEN_SIZE[1] - 32), obstacles) ]
 
-        while not done:
-            for event in pygame.event.get():
-                done = event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE)
+        while True:
+            if self.check_window_events(): break
 
-            keys = pygame.key.get_pressed()
-
-            if keys[pygame.K_SPACE]: self.player.jump()
+            self.update()
 
             self.screen.blit(BACKGROUND_IMAGE, (0, 0))
             self.player.draw_particle_trail(self.screen)
-
             self.player_sprite.update()
-
-            if self.player.is_jumping:
-                angle -= 8.1712
-                self.player.blitRotate(self.screen, angle)
-            else:
-                self.player_sprite.draw(self.screen)
-
-            for sprite in self.obstacles:
-                sprite.rect.x -= self.player.vel.x
+            self.player.blitRotate(self.screen, self.player.rotation_angle)
 
             obstacles.draw(self.screen)
 

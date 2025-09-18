@@ -3,7 +3,7 @@ import random
 
 from pygame.math import Vector2
 
-from src.constants import WHITE, GRAVITY, MAX_VELOCITY, SCREEN_SIZE
+from src.constants import WHITE, GRAVITY, MAX_VELOCITY, SCREEN_SIZE, ROTATION_ANGLE
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, image: pygame.Surface, *groups):
@@ -12,6 +12,7 @@ class Player(pygame.sprite.Sprite):
 
         self.image = image
         self.rect = self.image.get_rect(center=self.position)
+        self.rotation_angle = 0
         self.jump_amount = 10
         self.particles = []
         self.is_jumping = False
@@ -37,6 +38,9 @@ class Player(pygame.sprite.Sprite):
         self.vel.y = -self.jump_amount
         self.is_jumping = True
 
+    def rotate(self):
+        self.rotation_angle -= ROTATION_ANGLE
+
     def update(self):
         self.vel.y = min(self.vel.y + GRAVITY, MAX_VELOCITY)
 
@@ -44,6 +48,7 @@ class Player(pygame.sprite.Sprite):
         # TODO: Remove this cap is only for testing
         if self.rect.top >= SCREEN_SIZE[1] - self.rect.height:
             self.is_jumping = False
+            self.rotation_angle = 0
             self.rect.top = SCREEN_SIZE[1] - self.rect.height
 
     def blitRotate(self, surface: pygame.Surface, angle: float):
