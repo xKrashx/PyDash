@@ -19,6 +19,7 @@ class Player(pygame.sprite.Sprite):
         self.particles = []
         self.is_jumping = False
         self.is_dead = False
+        self.is_on_ground = False
         self.vel = Vector2(6, 0)
 
     def draw_particle_trail(self, surface: pygame.Surface, color=WHITE):
@@ -36,18 +37,29 @@ class Player(pygame.sprite.Sprite):
             pygame.draw.rect(surface, color, ([particle[0][0], particle[0][1]], [particle[2], particle[2]]))
             if particle[2] <= 0: self.particles.remove(particle)
 
-    def jump(self):
+    def jump(self) -> None:
         if self.is_jumping: return
         self.vel.y = -self.jump_amount
         self.is_jumping = True
+        self.is_on_ground = False
 
-    def rotate(self):
+    def rotate(self) -> None:
         self.rotation_angle -= ROTATION_ANGLE
 
-    def died(self):
+    def died(self) -> None:
         self.is_dead = True
 
+    def land(self, ground: int) -> None:
+        self.is_jumping = False
+        self.is_on_ground = True
+        self.rotation_angle = 0
+        self.position[1] = ground - self.image.get_height() // 2
+        self.vel.y = 0
+        rotated_image = pygame.transform.rotozoom(self.image, self.rotation_angle, 1)
+        self.mask = pygame.mask.from_surface(rotated_image)
+
     def update(self):
+        if self.is_on_ground: return
         self.vel.y = min(self.vel.y + GRAVITY, MAX_VELOCITY)
         self.position[1] += self.vel.y
 

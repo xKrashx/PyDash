@@ -29,6 +29,8 @@ class Game:
 
     def collision_checks(self, obstacle: Obstacle):
         if isinstance(obstacle, Spike): self.player.died()
+        if isinstance(obstacle, Block) and self.player.vel.y > 0:
+            self.player.land(obstacle.rect.top)
 
     def update(self):
         keys = pygame.key.get_pressed()
