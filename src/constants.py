@@ -3,7 +3,7 @@ import os
 WHITE = (255, 255, 255, 1)
 RED = (255, 0, 0, 1)
 
-SCREEN_SIZE = (800, 600)
+SCREEN_SIZE = (800, 608)
 SPRITE_SIZE = (32, 32)
 
 GRAVITY = 0.86
