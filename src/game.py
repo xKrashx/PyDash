@@ -20,12 +20,14 @@ class Game:
 
         self.clock = pygame.time.Clock()
         self.running = True
+        self.debug_view = False
 
     def restart(self):
         from src.images import PLAYER_IMAGE
 
         self.player_sprite = pygame.sprite.Group()
         self.player = Player(PLAYER_IMAGE, self.player_sprite)
+        self.debug_view = False
 
     def collision_checks(self, obstacle: Obstacle):
         if isinstance(obstacle, Spike): self.player.died()
@@ -36,12 +38,16 @@ class Game:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE]: self.player.jump()
 
+        self.contact_point = None
         if self.player.is_jumping: self.player.rotate()
 
         self.player.update()
 
         for obstacle in self.obstacles:
             obstacle.move(pygame.math.Vector2(-self.player.vel.x, 0))
+            offset = (obstacle.rect.left - self.player.rect.left, obstacle.rect.top - self.player.rect.top)
+            overlap = self.player.mask.overlap(obstacle.mask, offset)
+            if overlap: self.contact_point = (overlap[0] + self.player.rect.left, overlap[1] + self.player.rect.top)
             if pygame.sprite.collide_mask(self.player, obstacle):
                 self.collision_checks(obstacle)
 
@@ -50,7 +56,27 @@ class Game:
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 self.running = False
             elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_TAB:
+                    self.debug_view = not self.debug_view
+                    return
                 if self.player.is_dead: self.restart()
+
+    def draw_mask(self, mask, rect, color=(0, 0, 255, 100)):
+        mask_surface = mask.to_surface(setcolor=color, unsetcolor=(0, 0, 0, 0))
+        mask_surface.set_colorkey((0, 0, 0))
+        mask_surface.set_alpha(100)  # semi-transparent
+        self.screen.blit(mask_surface, rect.topleft)
+
+    def draw_bounding_boxes(self):
+        pygame.draw.rect(self.screen, (255, 0, 0), self.player.rect, 2)
+        self.draw_mask(self.player.mask, self.player.rect, color=(0, 0, 255, 100))
+        for obstacle in self.obstacles:
+            pygame.draw.rect(self.screen, (0, 255, 0), obstacle.rect, 2)
+            if hasattr(obstacle, "mask"):
+                self.draw_mask(obstacle.mask, obstacle.rect, color=(255, 255, 0, 100))
+        if hasattr(self, "contact_point") and self.contact_point:
+            pygame.draw.circle(self.screen, (255, 0, 255), self.contact_point, 5)
+
     def run(self):
         from src.images import BACKGROUND_IMAGE, SPIKE_IMAGE, BLOCK_IMAGE
 
@@ -68,11 +94,13 @@ class Game:
             if not self.player.is_dead: self.update()
 
             self.screen.blit(BACKGROUND_IMAGE, (0, 0))
-            self.player.draw_particle_trail(self.screen)
-            self.player_sprite.update()
-            self.player.blitRotate(self.screen, self.player.rotation_angle)
 
-            obstacles.draw(self.screen)
+            if self.debug_view:
+                self.draw_bounding_boxes()
+            else:
+                if not self.player.is_dead: self.player.draw_particle_trail(self.screen)
+                self.player.blitRotate(self.screen)
+                obstacles.draw(self.screen)
 
             pygame.display.flip()
             self.clock.tick(60)
