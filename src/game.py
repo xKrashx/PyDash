@@ -36,31 +36,24 @@ class Game:
 
         if self.player.is_jumping: self.player.rotate()
 
+        self.player.update()
+
         for obstacle in self.obstacles:
             obstacle.move(pygame.math.Vector2(-self.player.vel.x, 0))
-            if pygame.sprite.collide_rect(self.player, obstacle):
+            if pygame.sprite.collide_mask(self.player, obstacle):
                 self.collision_checks(obstacle)
 
     def check_window_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 self.running = False
-                return True
-            elif event.type == pygame.KEYDOWN: return True
-
-    def wait(self):
-        while True:
-            if self.check_window_events(): break
-
-    def game_over_screen(self):
-        self.wait()
-        self.restart()
-
+            elif event.type == pygame.KEYDOWN:
+                if self.player.is_dead: self.restart()
     def run(self):
         from src.images import BACKGROUND_IMAGE, SPIKE_IMAGE, BLOCK_IMAGE
 
         obstacles = pygame.sprite.Group()
-        self.obstacles = [ Spike(SPIKE_IMAGE, (500, SCREEN_SIZE[1] - 32), obstacles) ]
+        self.obstacles = [ Spike(SPIKE_IMAGE, (500, SCREEN_SIZE[1] - 64), obstacles) ]
 
         for i in range(math.ceil(SCREEN_SIZE[0] / 32)):
             self.obstacles.append(Block(BLOCK_IMAGE, (i * 32, SCREEN_SIZE[1] - 32), obstacles))
@@ -70,9 +63,7 @@ class Game:
         while self.running:
             self.check_window_events()
 
-            self.update()
-
-            if self.player.is_dead: self.game_over_screen()
+            if not self.player.is_dead: self.update()
 
             self.screen.blit(BACKGROUND_IMAGE, (0, 0))
             self.player.draw_particle_trail(self.screen)

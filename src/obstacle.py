@@ -7,6 +7,7 @@ class Obstacle(pygame.sprite.Sprite):
         super().__init__(*groups)
         self.image = image
         self.rect = self.image.get_rect(topleft=pos)
+        self.mask = pygame.mask.from_surface(self.image)
 
     def move(self, direction: pygame.math.Vector2) -> None:
         self.rect.x += direction.x
