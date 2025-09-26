@@ -12,6 +12,3 @@ class Obstacle(pygame.sprite.Sprite):
     def move(self, direction: pygame.math.Vector2) -> None:
         self.rect.x += direction.x
         self.rect.y += direction.y
-
-        # TODO: I have to remove this. It is only here so the development of a collision system would be easier.
-        if self.rect.x <= 0: self.rect.x = SCREEN_SIZE[0]

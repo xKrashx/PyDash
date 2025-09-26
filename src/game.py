@@ -1,6 +1,6 @@
 import pygame
-import math
 
+from src.level_reader import load_level_from_csv
 from src.constants import SCREEN_SIZE
 from src.obstacle import Obstacle
 from src.player import Player
@@ -19,6 +19,7 @@ class Game:
         pygame.display.set_icon(PLAYER_IMAGE)
 
         self.clock = pygame.time.Clock()
+        self.obstacles_group = pygame.sprite.Group()
         self.running = True
         self.debug_view = False
 
@@ -28,6 +29,8 @@ class Game:
         self.player_sprite = pygame.sprite.Group()
         self.player = Player(PLAYER_IMAGE, self.player_sprite)
         self.debug_view = False
+        self.obstacles_group.empty()
+        self.obstacles = load_level_from_csv("levels/level1.csv", self.obstacles_group)
 
     def collision_checks(self, obstacle: Obstacle):
         if isinstance(obstacle, Spike): self.player.died()
@@ -78,13 +81,9 @@ class Game:
             pygame.draw.circle(self.screen, (255, 0, 255), self.contact_point, 5)
 
     def run(self):
-        from src.images import BACKGROUND_IMAGE, SPIKE_IMAGE, BLOCK_IMAGE
+        from src.images import BACKGROUND_IMAGE
 
-        obstacles = pygame.sprite.Group()
-        self.obstacles = [ Spike(SPIKE_IMAGE, (500, SCREEN_SIZE[1] - 64), obstacles) ]
-
-        for i in range(math.ceil(SCREEN_SIZE[0] / 32)):
-            self.obstacles.append(Block(BLOCK_IMAGE, (i * 32, SCREEN_SIZE[1] - 32), obstacles))
+        self.obstacles = load_level_from_csv("levels/level1.csv", self.obstacles_group)
 
         self.restart()
 
@@ -100,7 +99,7 @@ class Game:
             else:
                 if not self.player.is_dead: self.player.draw_particle_trail(self.screen)
                 self.player.blitRotate(self.screen)
-                obstacles.draw(self.screen)
+                self.obstacles_group.draw(self.screen)
 
             pygame.display.flip()
             self.clock.tick(60)
