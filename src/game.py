@@ -2,11 +2,12 @@ import pygame
 import os
 
 from src.level_reader import load_level_from_csv
-from src.constants import SCREEN_SIZE, RED, BLUE, GREEN, BLACK, YELLOW, PURPLE
+from src.constants import SCREEN_SIZE, RED, GREEN, BLACK, PURPLE
 from src.obstacle import Obstacle
 from src.player import Player
 from src.spike import Spike
 from src.block import Block
+from src.coin import Coin
 
 class Game:
     def __init__(self):
@@ -27,9 +28,12 @@ class Game:
     def restart(self):
         from src.images import PLAYER_IMAGE
 
+        self.debug_view = False
+        self.points = 0
+
         self.player_sprite = pygame.sprite.Group()
         self.player = Player(PLAYER_IMAGE, self.player_sprite)
-        self.debug_view = False
+
         self.obstacles_group.empty()
         self.obstacles = load_level_from_csv("levels/level1.csv", self.obstacles_group)
 
@@ -40,8 +44,13 @@ class Game:
         if isinstance(obstacle, Spike):
             self.player.died()
             pygame.mixer_music.stop()
-        if isinstance(obstacle, Block) and self.player.vel.y > 0:
+            print(self.points)
+        elif isinstance(obstacle, Block) and self.player.vel.y > 0:
             self.player.land(obstacle.rect.top)
+        elif isinstance(obstacle, Coin):
+            self.obstacles_group.remove(obstacle)
+            self.obstacles.remove(obstacle)
+            self.points += 1
 
     def update(self):
         keys = pygame.key.get_pressed()
@@ -70,7 +79,7 @@ class Game:
                     return
                 if self.player.is_dead: self.restart()
 
-    def draw_mask(self, mask, rect, color=BLUE):
+    def draw_mask(self, mask, rect, color=(0, 0, 255, 100)):
         mask_surface = mask.to_surface(setcolor=color, unsetcolor=BLACK)
         mask_surface.set_colorkey(BLACK)
         mask_surface.set_alpha(100)  # semi-transparent
