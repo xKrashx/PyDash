@@ -2,7 +2,7 @@ import pygame
 import os
 
 from src.level_reader import load_level_from_csv
-from src.constants import SCREEN_SIZE
+from src.constants import SCREEN_SIZE, RED, BLUE, GREEN, BLACK, YELLOW, PURPLE
 from src.obstacle import Obstacle
 from src.player import Player
 from src.spike import Spike
@@ -70,21 +70,21 @@ class Game:
                     return
                 if self.player.is_dead: self.restart()
 
-    def draw_mask(self, mask, rect, color=(0, 0, 255, 100)):
-        mask_surface = mask.to_surface(setcolor=color, unsetcolor=(0, 0, 0, 0))
-        mask_surface.set_colorkey((0, 0, 0))
+    def draw_mask(self, mask, rect, color=BLUE):
+        mask_surface = mask.to_surface(setcolor=color, unsetcolor=BLACK)
+        mask_surface.set_colorkey(BLACK)
         mask_surface.set_alpha(100)  # semi-transparent
         self.screen.blit(mask_surface, rect.topleft)
 
     def draw_bounding_boxes(self):
-        pygame.draw.rect(self.screen, (255, 0, 0), self.player.rect, 2)
+        pygame.draw.rect(self.screen, RED, self.player.rect, 2)
         self.draw_mask(self.player.mask, self.player.rect, color=(0, 0, 255, 100))
         for obstacle in self.obstacles:
-            pygame.draw.rect(self.screen, (0, 255, 0), obstacle.rect, 2)
+            pygame.draw.rect(self.screen, GREEN, obstacle.rect, 2)
             if hasattr(obstacle, "mask"):
                 self.draw_mask(obstacle.mask, obstacle.rect, color=(255, 255, 0, 100))
         if hasattr(self, "contact_point") and self.contact_point:
-            pygame.draw.circle(self.screen, (255, 0, 255), self.contact_point, 5)
+            pygame.draw.circle(self.screen, PURPLE, self.contact_point, 5)
 
     def run(self):
         from src.images import BACKGROUND_IMAGE

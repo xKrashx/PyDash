@@ -1,7 +1,11 @@
 import os
 
 WHITE = (255, 255, 255, 1)
+BLACK = (0, 0, 0, 1)
+
 RED = (255, 0, 0, 1)
+GREEN = (0, 255, 0, 1)
+PURPLE = (255, 0, 255, 1)
 
 SCREEN_SIZE = (800, 608)
 SPRITE_SIZE = (32, 32)
