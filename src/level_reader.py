@@ -1,14 +1,15 @@
 import csv
 import pygame
+
 from src.block import Block
 from src.spike import Spike
 from src.coin import Coin
+from src.portal import Portal
 from src.constants import SPRITE_SIZE
 
 def load_level_from_csv(filename, group):
-    from src.images import BLOCK_IMAGE, SPIKE_IMAGE, COIN_IMAGE
+    from src.images import BLOCK_IMAGE, SPIKE_IMAGE, COIN_IMAGE, PORTAL_IMAGE
     obstacles = []
-    max_col_index = 0
 
     with open(filename, newline='') as csvfile:
         reader = csv.reader(csvfile)
@@ -22,8 +23,6 @@ def load_level_from_csv(filename, group):
                 x = col_idx * SPRITE_SIZE[0]
                 y = row_idx * SPRITE_SIZE[1]
 
-                max_col_index = max(max_col_index, col_idx)
-
                 should_rotate = value < 0
                 value = abs(value)
                 obj = None
@@ -35,7 +34,8 @@ def load_level_from_csv(filename, group):
                     if should_rotate: image = pygame.transform.rotate(SPIKE_IMAGE, 180)
                     obj = Spike(image, (x, y), group)
                 elif value == 3: obj = Coin(COIN_IMAGE, (x, y), group)
+                elif value == 4: obj = Portal(PORTAL_IMAGE, (x, y), group)
 
                 if obj: obstacles.append(obj)
 
-    return obstacles, (max_col_index + 1) * SPRITE_SIZE[0]
+    return obstacles

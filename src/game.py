@@ -2,12 +2,13 @@ import pygame
 import os
 
 from src.level_reader import load_level_from_csv
-from src.constants import SCREEN_SIZE, RED, GREEN, BLACK, PURPLE
+from src.constants import SCREEN_SIZE, RED, GREEN, BLACK, PURPLE, SPRITE_SIZE
 from src.obstacle import Obstacle
 from src.player import Player
 from src.spike import Spike
 from src.block import Block
 from src.coin import Coin
+from src.portal import Portal
 
 class Game:
     def __init__(self):
@@ -30,13 +31,14 @@ class Game:
 
         self.debug_view = False
         self.points = 0
-        self.completion_bar_reference_point = 0
 
         self.player_sprite = pygame.sprite.Group()
         self.player = Player(PLAYER_IMAGE, self.player_sprite)
 
         self.obstacles_group.empty()
-        self.obstacles, self.level_width = load_level_from_csv("levels/level1.csv", self.obstacles_group)
+        self.obstacles = load_level_from_csv("levels/level1.csv", self.obstacles_group)
+        self.portal_obstacle = next((o for o in self.obstacles if isinstance(o, Portal)), None)
+        if self.portal_obstacle: self.initial_portal_distance = abs(self.portal_obstacle.rect.left - self.player.rect.left)
 
         pygame.mixer_music.load(os.path.join("resources/music", "bossfight-Vextron.mp3"))
         pygame.mixer_music.play()
@@ -52,9 +54,17 @@ class Game:
             self.obstacles_group.remove(obstacle)
             self.obstacles.remove(obstacle)
             self.points += 1
+        elif isinstance(obstacle, Portal):
+            self.player.died()
+            pygame.mixer_music.stop()
+            print("Level Complete! Points:", self.points)
 
-    def draw_progress_bar(self, surface, bar_width=600, bar_height=10, color=(0, 200, 0)):
-        progress = min(max(self.completion_bar_reference_point / self.level_width, 0), 1)
+    def draw_progress_bar(self, surface, bar_width=600, bar_height=10, color=(0, 200, 0), finish_offset=SPRITE_SIZE[0]):
+        if not self.portal_obstacle or not self.initial_portal_distance: return
+
+        current_distance = max(abs(self.portal_obstacle.rect.left - self.player.rect.left) - finish_offset, 1)
+        progress = 1 - min(current_distance / self.initial_portal_distance, 1)
+
         fill_width = int(bar_width * progress)
         outline_rect = pygame.Rect(100, 20, bar_width, bar_height)
         fill_rect = pygame.Rect(100, 20, fill_width, bar_height)
@@ -69,7 +79,6 @@ class Game:
         if self.player.is_jumping: self.player.rotate()
 
         self.player.update()
-        self.completion_bar_reference_point += self.player.vel.x
 
         for obstacle in self.obstacles:
             obstacle.move(pygame.math.Vector2(-self.player.vel.x, 0))
