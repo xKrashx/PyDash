@@ -8,6 +8,7 @@ from src.constants import SPRITE_SIZE
 def load_level_from_csv(filename, group):
     from src.images import BLOCK_IMAGE, SPIKE_IMAGE, COIN_IMAGE
     obstacles = []
+    max_col_index = 0
 
     with open(filename, newline='') as csvfile:
         reader = csv.reader(csvfile)
@@ -20,6 +21,8 @@ def load_level_from_csv(filename, group):
 
                 x = col_idx * SPRITE_SIZE[0]
                 y = row_idx * SPRITE_SIZE[1]
+
+                max_col_index = max(max_col_index, col_idx)
 
                 should_rotate = value < 0
                 value = abs(value)
@@ -35,4 +38,4 @@ def load_level_from_csv(filename, group):
 
                 if obj: obstacles.append(obj)
 
-    return obstacles
+    return obstacles, (max_col_index + 1) * SPRITE_SIZE[0]

@@ -30,12 +30,13 @@ class Game:
 
         self.debug_view = False
         self.points = 0
+        self.completion_bar_reference_point = 0
 
         self.player_sprite = pygame.sprite.Group()
         self.player = Player(PLAYER_IMAGE, self.player_sprite)
 
         self.obstacles_group.empty()
-        self.obstacles = load_level_from_csv("levels/level1.csv", self.obstacles_group)
+        self.obstacles, self.level_width = load_level_from_csv("levels/level1.csv", self.obstacles_group)
 
         pygame.mixer_music.load(os.path.join("resources/music", "bossfight-Vextron.mp3"))
         pygame.mixer_music.play()
@@ -52,6 +53,14 @@ class Game:
             self.obstacles.remove(obstacle)
             self.points += 1
 
+    def draw_progress_bar(self, surface, bar_width=600, bar_height=10, color=(0, 200, 0)):
+        progress = min(max(self.completion_bar_reference_point / self.level_width, 0), 1)
+        fill_width = int(bar_width * progress)
+        outline_rect = pygame.Rect(100, 20, bar_width, bar_height)
+        fill_rect = pygame.Rect(100, 20, fill_width, bar_height)
+        pygame.draw.rect(surface, color, fill_rect)
+        pygame.draw.rect(surface, (255, 255, 255), outline_rect, 2)
+
     def update(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE]: self.player.jump()
@@ -60,6 +69,7 @@ class Game:
         if self.player.is_jumping: self.player.rotate()
 
         self.player.update()
+        self.completion_bar_reference_point += self.player.vel.x
 
         for obstacle in self.obstacles:
             obstacle.move(pygame.math.Vector2(-self.player.vel.x, 0))
@@ -113,6 +123,7 @@ class Game:
                 self.draw_bounding_boxes()
             else:
                 if not self.player.is_dead: self.player.draw_particle_trail(self.screen)
+                self.draw_progress_bar(self.screen)
                 self.player.blitRotate(self.screen)
                 self.obstacles_group.draw(self.screen)
 
