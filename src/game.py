@@ -1,4 +1,5 @@
 import pygame
+import os
 
 from src.level_reader import load_level_from_csv
 from src.constants import SCREEN_SIZE
@@ -32,8 +33,13 @@ class Game:
         self.obstacles_group.empty()
         self.obstacles = load_level_from_csv("levels/level1.csv", self.obstacles_group)
 
+        pygame.mixer_music.load(os.path.join("resources/music", "bossfight-Vextron.mp3"))
+        pygame.mixer_music.play()
+
     def collision_checks(self, obstacle: Obstacle):
-        if isinstance(obstacle, Spike): self.player.died()
+        if isinstance(obstacle, Spike):
+            self.player.died()
+            pygame.mixer_music.stop()
         if isinstance(obstacle, Block) and self.player.vel.y > 0:
             self.player.land(obstacle.rect.top)
 
