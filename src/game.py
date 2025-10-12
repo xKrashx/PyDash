@@ -3,6 +3,7 @@ import os
 
 from enum import Enum
 
+from src.renderer import Renderer
 from src.input_handler import InputHandler
 from src.level_reader import load_level_from_csv
 from src.constants import SCREEN_SIZE, RED, GREEN, BLACK, PURPLE, SPRITE_SIZE, OBSTACLE_SPEED, PROJECT_DIR
@@ -25,15 +26,12 @@ class Game:
         pygame.display.set_icon(PLAYER_IMAGE)
 
         self.input_handler = InputHandler(self)
+        self.renderer = Renderer(self.screen)
 
         self.clock = pygame.time.Clock()
         self.obstacles_group = pygame.sprite.Group()
         self.running = True
         self.debug_view = False
-        
-        self.big_font = pygame.font.Font(os.path.join(PROJECT_DIR, "resources/fonts/PUSAB_.ttf"), 60)
-        self.mid_font = pygame.font.Font(os.path.join(PROJECT_DIR, "resources/fonts/PUSAB_.ttf"), 48)
-        self.small_font = pygame.font.Font(os.path.join(PROJECT_DIR, "resources/fonts/PUSAB_.ttf"), 36)
 
         self.state = Game.State.LEVEL_SELECT
         self.available_levels = ["levels/level1.csv", "levels/testing.csv"]
@@ -79,23 +77,6 @@ class Game:
             self.points += 1
         elif isinstance(obstacle, Portal): complete_level(True)
 
-    def draw_text(self, text, font, color, x, y):
-        text_obj = font.render(text, True, color)
-        text_rect = text_obj.get_rect(center=(x, y))
-        self.screen.blit(text_obj, text_rect)
-
-    def draw_progress_bar(self, bar_width=600, bar_height=10, color=(0, 200, 0), finish_offset=SPRITE_SIZE[0]):
-        if not self.portal_obstacle or not self.initial_portal_distance: return
-
-        current_distance = max(abs(self.portal_obstacle.rect.left - self.player.rect.left) - finish_offset, 1)
-        progress = 1 - min(current_distance / self.initial_portal_distance, 1)
-
-        fill_width = int(bar_width * progress)
-        outline_rect = pygame.Rect(100, 20, bar_width, bar_height)
-        fill_rect = pygame.Rect(100, 20, fill_width, bar_height)
-        pygame.draw.rect(self.screen, color, fill_rect)
-        pygame.draw.rect(self.screen, (255, 255, 255), outline_rect, 2)
-
     def has_block_above(self) -> bool:
         head_rect = self.player.rect.copy()
         head_rect.height = 4
@@ -127,71 +108,27 @@ class Game:
             if pygame.sprite.collide_mask(self.player, obstacle):
                 self.collision_checks(obstacle)
 
-    def draw_mask(self, mask, rect, color=(0, 0, 255, 100)):
-        mask_surface = mask.to_surface(setcolor=color, unsetcolor=BLACK)
-        mask_surface.set_colorkey(BLACK)
-        mask_surface.set_alpha(100)
-        self.screen.blit(mask_surface, rect.topleft)
-
-    def draw_bounding_boxes(self):
-        pygame.draw.rect(self.screen, RED, self.player.rect, 2)
-        self.draw_mask(self.player.mask, self.player.rect, color=(0, 0, 255, 100))
-        for obstacle in self.obstacles:
-            pygame.draw.rect(self.screen, GREEN, obstacle.rect, 2)
-            if hasattr(obstacle, "mask"): self.draw_mask(obstacle.mask, obstacle.rect, color=(255, 255, 0, 100))
-        if hasattr(self, "contact_point") and self.contact_point: pygame.draw.circle(self.screen, PURPLE, self.contact_point, 5)
-
-    def draw_level_select_menu(self):
-        self.draw_text("Select Level", self.big_font, BLACK, SCREEN_SIZE[0]//2, 120)
-        for i, lvl in enumerate(self.available_levels):
-            name = os.path.basename(lvl)
-            color = (0, 0, 0)
-            x = SCREEN_SIZE[0]//2
-            y = 220 + i * 60
-            if i == self.selected_level: pygame.draw.rect(self.screen, (200, 200, 0), (x - 220, y - 24, 440, 48))
-            self.draw_text(name, self.mid_font, color, x, y)
-        self.draw_text("Use Up/Down and Enter to select", self.small_font, BLACK, SCREEN_SIZE[0]//2, SCREEN_SIZE[1] - 60)
-
-    def draw_game_over_menu(self):
-        title = "Level Complete!" if self.level_complete else "Game Over"
-        self.draw_text(title, self.big_font, BLACK, SCREEN_SIZE[0]//2, 120)
-        options = ["Retry", "Main Menu", "Quit"]
-        for i, opt in enumerate(options):
-            x = SCREEN_SIZE[0]//2
-            y = 220 + i * 60
-            color = BLACK
-            if i == self.input_handler.gameover_selection: pygame.draw.rect(self.screen, (200, 200, 0), (x - 220, y - 24, 440, 48))
-            self.draw_text(opt, self.mid_font, color, x, y)
-        self.draw_text(f"Points: {getattr(self, 'points', 0)}", self.small_font, BLACK, SCREEN_SIZE[0]//2, SCREEN_SIZE[1] - 80)
-
     def run(self):
-        from src.images import BACKGROUND_IMAGE
-
         while self.running:
             self.input_handler.handle_events()
+            self.screen.blit(BACKGROUND_IMAGE, (0, 0))
 
             if self.state == Game.State.PLAYING:
                 if not getattr(self, "player", None): self.restart(self.available_levels[self.selected_level])
                 if not self.player.is_dead: self.update()
 
-                self.screen.blit(BACKGROUND_IMAGE, (0, 0))
-                self.draw_text(f"Points: {getattr(self, 'points', 0)}", self.small_font, BLACK, 120, 50)
+                self.renderer.draw_text(f"Points: {getattr(self, 'points', 0)}", self.renderer.small_font, BLACK, 120, 50)
 
                 if self.debug_view:
-                    self.draw_bounding_boxes()
+                    self.renderer.draw_bounding_boxes(self.player, self.obstacles, self.contact_point)
                 else:
                     if not self.player.is_dead: self.player.draw_particle_trail(self.screen)
-                    self.draw_progress_bar()
-                    self.player.blitRotate(self.screen)
+                    if self.portal_obstacle and not self.player.is_dead: self.renderer.draw_progress_bar(current_distance=abs(self.portal_obstacle.rect.left - self.player.rect.left), initial_portal_distance=self.initial_portal_distance)
+                    self.player.display(self.screen)
                     self.obstacles_group.draw(self.screen)
 
-            elif self.state == Game.State.LEVEL_SELECT:
-                self.screen.blit(BACKGROUND_IMAGE, (0, 0))
-                self.draw_level_select_menu()
-
-            elif self.state == Game.State.GAME_OVER:
-                self.screen.blit(BACKGROUND_IMAGE, (0, 0))
-                self.draw_game_over_menu()
+            elif self.state == Game.State.LEVEL_SELECT: self.renderer.draw_level_select_menu(self.available_levels, self.selected_level)
+            elif self.state == Game.State.GAME_OVER: self.renderer.draw_game_over_menu(self.level_complete, self.input_handler.game_over_selection, self.points)
 
             pygame.display.flip()
             self.clock.tick(60)
