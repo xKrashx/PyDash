@@ -3,15 +3,15 @@ import random
 
 from pygame.math import Vector2
 
-from src.constants import WHITE, GRAVITY, MAX_VELOCITY, SCREEN_SIZE, ROTATION_ANGLE
+from src.constants import WHITE, GRAVITY, MAX_VELOCITY, ROTATION_ANGLE
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, image: pygame.Surface, *groups):
         super().__init__(*groups)
-        self.position = [66, 0]
+        self.position = Vector2(66, 100)
 
         self.image = image
-        self.rect = self.image.get_rect(center=self.position)
+        self.rect = self.image.get_rect(center=(int(self.position.x), int(self.position.y)))
         self.mask = pygame.mask.from_surface(self.image)
 
         self.rotation_angle = 0
@@ -21,6 +21,9 @@ class Player(pygame.sprite.Sprite):
         self.is_dead = False
         self.is_on_ground = False
         self.vel = Vector2(6, 0)
+
+        self.jump_cooldown_ms = 50
+        self.last_jump_time = -self.jump_cooldown_ms
 
     def draw_particle_trail(self, surface: pygame.Surface, color=WHITE):
         self.particles.append([
@@ -39,9 +42,15 @@ class Player(pygame.sprite.Sprite):
 
     def jump(self) -> None:
         if self.is_jumping: return
+
+        now = pygame.time.get_ticks()
+
+        if now - self.last_jump_time < self.jump_cooldown_ms: return
+
         self.vel.y = -self.jump_amount
         self.is_jumping = True
         self.is_on_ground = False
+        self.last_jump_time = now
 
     def rotate(self) -> None:
         self.rotation_angle -= ROTATION_ANGLE
@@ -53,15 +62,18 @@ class Player(pygame.sprite.Sprite):
         self.is_jumping = False
         self.is_on_ground = True
         self.rotation_angle = 0
-        self.position[1] = ground - self.image.get_height() // 2
+        self.position.y = ground - self.image.get_height() // 2
+        self.rect.center = (int(self.position.x), int(self.position.y))
         self.vel.y = 0
         rotated_image = pygame.transform.rotozoom(self.image, self.rotation_angle, 1)
         self.mask = pygame.mask.from_surface(rotated_image)
+        self.last_jump_time = pygame.time.get_ticks()
 
     def update(self):
-        if self.is_on_ground: return
-        self.vel.y = min(self.vel.y + GRAVITY, MAX_VELOCITY)
-        self.position[1] += self.vel.y
+        if not self.is_on_ground:
+            self.vel.y = min(self.vel.y + GRAVITY, MAX_VELOCITY)
+        self.position.y += self.vel.y
+        self.rect.center = (int(self.position.x), int(self.position.y))
 
     def blitRotate(self, surface: pygame.Surface):
         origin_position = (16, 16)

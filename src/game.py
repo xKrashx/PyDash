@@ -48,8 +48,13 @@ class Game:
             self.player.died()
             pygame.mixer_music.stop()
             print(self.points)
-        elif isinstance(obstacle, Block) and self.player.vel.y > 0:
-            self.player.land(obstacle.rect.top)
+        elif isinstance(obstacle, Block):
+            print(self.player.rect.center)
+            if obstacle.rect.top <= self.player.rect.center[1] or self.player.rect.center[1] >= obstacle.rect.bottom: 
+                self.player.died()
+                pygame.mixer_music.stop()
+                print(self.points)
+            elif self.player.vel.y > 0: self.player.land(obstacle.rect.top)
         elif isinstance(obstacle, Coin):
             self.obstacles_group.remove(obstacle)
             self.obstacles.remove(obstacle)
@@ -71,12 +76,26 @@ class Game:
         pygame.draw.rect(self.screen, color, fill_rect)
         pygame.draw.rect(self.screen, (255, 255, 255), outline_rect, 2)
 
+    def has_block_above(self) -> bool:
+        head_rect = self.player.rect.copy()
+        head_rect.height = 4
+        head_rect.top = self.player.rect.top - head_rect.height - 1
+        return any(isinstance(obstacle, Block) and obstacle.rect.colliderect(head_rect) for obstacle in self.obstacles)
+
+    def has_block_below(self) -> bool:
+        head_rect = self.player.rect.copy()
+        head_rect.height = 4
+        head_rect.bottom = self.player.rect.bottom + head_rect.height + 1
+        return any(isinstance(obstacle, Block) and obstacle.rect.colliderect(head_rect) for obstacle in self.obstacles)
+
     def update(self):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE]: self.player.jump()
+        if keys[pygame.K_SPACE] and not self.has_block_above(): self.player.jump()
+
+        if not self.player.is_jumping and not self.has_block_below(): self.player.is_on_ground = False
 
         self.contact_point = None
-        if self.player.is_jumping: self.player.rotate()
+        if not self.player.is_on_ground: self.player.rotate()
 
         self.player.update()
 
