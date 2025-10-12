@@ -1,4 +1,4 @@
-from src.obstacle import Obstacle
+from src.entities.obstacle import Obstacle
 
 class Block(Obstacle):
     def __init__(self, image, pos, *groups):

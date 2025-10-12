@@ -6,12 +6,7 @@ from enum import Enum
 from src.input_handler import InputHandler
 from src.level_reader import load_level_from_csv
 from src.constants import SCREEN_SIZE, RED, GREEN, BLACK, PURPLE, SPRITE_SIZE, PROJECT_DIR
-from src.obstacle import Obstacle
-from src.player import Player
-from src.spike import Spike
-from src.block import Block
-from src.coin import Coin
-from src.portal import Portal
+from src.entities import Player, Spike, Block, Coin, Portal, Obstacle
 
 class Game:
     class State(Enum):

@@ -1,7 +1,5 @@
 import pygame
 
-from src.constants import SCREEN_SIZE
-
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, image, pos, *groups) -> None:
         super().__init__(*groups)
