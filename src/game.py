@@ -5,7 +5,7 @@ from enum import Enum
 
 from src.input_handler import InputHandler
 from src.level_reader import load_level_from_csv
-from src.constants import SCREEN_SIZE, RED, GREEN, BLACK, PURPLE, SPRITE_SIZE, PROJECT_DIR
+from src.constants import SCREEN_SIZE, RED, GREEN, BLACK, PURPLE, SPRITE_SIZE, OBSTACLE_SPEED, PROJECT_DIR
 from src.entities import Player, Spike, Block, Coin, Portal, Obstacle
 
 class Game:
@@ -72,7 +72,7 @@ class Game:
         if isinstance(obstacle, Spike): complete_level(False)
         elif isinstance(obstacle, Block):
             if obstacle.rect.top <= self.player.rect.center[1] or self.player.rect.center[1] >= obstacle.rect.bottom:  complete_level(False)
-            elif self.player.vel.y > 0: self.player.land(obstacle.rect.top)
+            elif self.player.velocity > 0: self.player.land(obstacle.rect.top)
         elif isinstance(obstacle, Coin):
             self.obstacles_group.remove(obstacle)
             self.obstacles.remove(obstacle)
@@ -120,7 +120,7 @@ class Game:
         self.player.update()
 
         for obstacle in self.obstacles:
-            obstacle.move(pygame.math.Vector2(-self.player.vel.x, 0))
+            obstacle.move(pygame.math.Vector2(OBSTACLE_SPEED, 0))
             offset = (obstacle.rect.left - self.player.rect.left, obstacle.rect.top - self.player.rect.top)
             overlap = self.player.mask.overlap(obstacle.mask, offset)
             if overlap: self.contact_point = (overlap[0] + self.player.rect.left, overlap[1] + self.player.rect.top)
