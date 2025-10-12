@@ -22,3 +22,10 @@ JUMP_COOLDOWN_MS = 50
 
 # Path to the project directory
 PROJECT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../')
+
+BACKGROUND_IMAGE_PATH = os.path.join("resources/images", "background.png")
+PORTAL_IMAGE_PATH = os.path.join("resources/images", "portal.webp")
+PLAYER_IMAGE_PATH = os.path.join("resources/images", "avatar.png")
+BLOCK_IMAGE_PATH = os.path.join("resources/images", "block.png")
+SPIKE_IMAGE_PATH = os.path.join("resources/images", "spike.png")
+COIN_IMAGE_PATH = os.path.join("resources/images", "coin.png")

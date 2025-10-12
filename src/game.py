@@ -5,9 +5,10 @@ from enum import Enum
 
 from src.renderer import Renderer
 from src.input_handler import InputHandler
+from src.image_manager import ImageManager
 from src.level_reader import load_level_from_csv
-from src.constants import SCREEN_SIZE, RED, GREEN, BLACK, PURPLE, SPRITE_SIZE, OBSTACLE_SPEED, PROJECT_DIR
 from src.entities import Player, Spike, Block, Coin, Portal, Obstacle
+from src.constants import SCREEN_SIZE, BLACK, OBSTACLE_SPEED, PLAYER_IMAGE_PATH, BACKGROUND_IMAGE_PATH, SPRITE_SIZE
 
 class Game:
     class State(Enum):
@@ -19,11 +20,10 @@ class Game:
         pygame.init()
 
         self.screen = pygame.display.set_mode(SCREEN_SIZE)
-
-        from src.images import PLAYER_IMAGE
+        self.image_manager = ImageManager()
 
         pygame.display.set_caption('Pydash: Geometry Dash in Python')
-        pygame.display.set_icon(PLAYER_IMAGE)
+        pygame.display.set_icon(self.image_manager.get(PLAYER_IMAGE_PATH, SPRITE_SIZE))
 
         self.input_handler = InputHandler(self)
         self.renderer = Renderer(self.screen)
@@ -40,8 +40,6 @@ class Game:
         self.current_level_path = None
 
     def restart(self, level_path=None):
-        from src.images import PLAYER_IMAGE
-
         self.state = Game.State.PLAYING
         self.level_complete = False
 
@@ -49,12 +47,12 @@ class Game:
         self.points = 0
 
         self.player_sprite = pygame.sprite.Group()
-        self.player = Player(PLAYER_IMAGE, self.player_sprite)
+        self.player = Player(self.image_manager.get(PLAYER_IMAGE_PATH, SPRITE_SIZE), self.player_sprite)
 
         self.obstacles_group.empty()
         level_to_load = level_path or "levels/level1.csv"
         self.current_level_path = level_to_load
-        self.obstacles = load_level_from_csv(level_to_load, self.obstacles_group)
+        self.obstacles = load_level_from_csv(level_to_load, self.obstacles_group, self.image_manager)
         self.portal_obstacle = next((o for o in self.obstacles if isinstance(o, Portal)), None)
         if self.portal_obstacle: self.initial_portal_distance = abs(self.portal_obstacle.rect.left - self.player.rect.left)
 
@@ -111,7 +109,7 @@ class Game:
     def run(self):
         while self.running:
             self.input_handler.handle_events()
-            self.screen.blit(BACKGROUND_IMAGE, (0, 0))
+            self.screen.blit(self.image_manager.get(BACKGROUND_IMAGE_PATH, SCREEN_SIZE), (0, 0))
 
             if self.state == Game.State.PLAYING:
                 if not getattr(self, "player", None): self.restart(self.available_levels[self.selected_level])
