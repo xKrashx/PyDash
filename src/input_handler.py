@@ -41,7 +41,7 @@ class InputHandler:
 
     def __init__(self, game):
         self.game = game
-        self.gameover_selection = InputHandler.MenuOption.RETRY
+        self.game_over_selection = InputHandler.MenuOption.RETRY
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -60,12 +60,12 @@ class InputHandler:
         elif event.key == pygame.K_RETURN: self.game.restart(self.game.available_levels[self.game.selected_level])
 
     def handle_game_over(self, event):
-        if event.key == pygame.K_UP: self.gameover_selection -= 1
-        elif event.key == pygame.K_DOWN: self.gameover_selection += 1
+        if event.key == pygame.K_UP: self.game_over_selection -= 1
+        elif event.key == pygame.K_DOWN: self.game_over_selection += 1
         elif event.key == pygame.K_RETURN:
-            if self.gameover_selection == InputHandler.MenuOption.RETRY: self.game.restart(self.game.current_level_path)
-            elif self.gameover_selection == InputHandler.MenuOption.MAIN_MENU: self.game.state = self.game.State.LEVEL_SELECT
-            elif self.gameover_selection == InputHandler.MenuOption.QUIT: self.game.running = False
+            if self.game_over_selection == InputHandler.MenuOption.RETRY: self.game.restart(self.game.current_level_path)
+            elif self.game_over_selection == InputHandler.MenuOption.MAIN_MENU: self.game.state = self.game.State.LEVEL_SELECT
+            elif self.game_over_selection == InputHandler.MenuOption.QUIT: self.game.running = False
 
     def handle_playing(self, event):
         if event.key == pygame.K_TAB: self.game.debug_view = not self.game.debug_view

@@ -74,7 +74,7 @@ class Player(pygame.sprite.Sprite):
         self.position.y += self.velocity
         self.rect.center = (int(self.position.x), int(self.position.y))
 
-    def blitRotate(self, surface: pygame.Surface):
+    def display(self, surface: pygame.Surface):
         origin_position = (16, 16)
         width, height = self.image.get_size()
         box = [Vector2(point) for point in [(0, 0), (width, 0), (width, -height), (0, -height)]]
