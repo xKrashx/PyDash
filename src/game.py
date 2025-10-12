@@ -59,7 +59,7 @@ class Game:
             pygame.mixer_music.stop()
             print("Level Complete! Points:", self.points)
 
-    def draw_progress_bar(self, surface, bar_width=600, bar_height=10, color=(0, 200, 0), finish_offset=SPRITE_SIZE[0]):
+    def draw_progress_bar(self, bar_width=600, bar_height=10, color=(0, 200, 0), finish_offset=SPRITE_SIZE[0]):
         if not self.portal_obstacle or not self.initial_portal_distance: return
 
         current_distance = max(abs(self.portal_obstacle.rect.left - self.player.rect.left) - finish_offset, 1)
@@ -68,8 +68,8 @@ class Game:
         fill_width = int(bar_width * progress)
         outline_rect = pygame.Rect(100, 20, bar_width, bar_height)
         fill_rect = pygame.Rect(100, 20, fill_width, bar_height)
-        pygame.draw.rect(surface, color, fill_rect)
-        pygame.draw.rect(surface, (255, 255, 255), outline_rect, 2)
+        pygame.draw.rect(self.screen, color, fill_rect)
+        pygame.draw.rect(self.screen, (255, 255, 255), outline_rect, 2)
 
     def update(self):
         keys = pygame.key.get_pressed()
@@ -101,7 +101,7 @@ class Game:
     def draw_mask(self, mask, rect, color=(0, 0, 255, 100)):
         mask_surface = mask.to_surface(setcolor=color, unsetcolor=BLACK)
         mask_surface.set_colorkey(BLACK)
-        mask_surface.set_alpha(100)  # semi-transparent
+        mask_surface.set_alpha(100)
         self.screen.blit(mask_surface, rect.topleft)
 
     def draw_bounding_boxes(self):
@@ -132,7 +132,7 @@ class Game:
                 self.draw_bounding_boxes()
             else:
                 if not self.player.is_dead: self.player.draw_particle_trail(self.screen)
-                self.draw_progress_bar(self.screen)
+                self.draw_progress_bar()
                 self.player.blitRotate(self.screen)
                 self.obstacles_group.draw(self.screen)
 
