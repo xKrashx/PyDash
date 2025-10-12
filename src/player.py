@@ -8,7 +8,7 @@ from src.constants import WHITE, GRAVITY, MAX_VELOCITY, ROTATION_ANGLE
 class Player(pygame.sprite.Sprite):
     def __init__(self, image: pygame.Surface, *groups):
         super().__init__(*groups)
-        self.position = Vector2(66, 100)
+        self.position = Vector2(66, 50)
 
         self.image = image
         self.rect = self.image.get_rect(center=(int(self.position.x), int(self.position.y)))
