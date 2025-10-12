@@ -75,7 +75,7 @@ class Game:
         self.small_font = pygame.font.Font(os.path.join(PROJECT_DIR, "resources/fonts/PUSAB_.ttf"), 36)
 
         self.state = Game.State.LEVEL_SELECT
-        self.available_levels = ["levels/level1.csv"]
+        self.available_levels = ["levels/level1.csv", "levels/testing.csv"]
         self.selected_level = 0
         self.gameover_selection = Game.MenuOption.RETRY
         self.level_complete = False
