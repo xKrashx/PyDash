@@ -1,10 +1,7 @@
 import csv
 import pygame
 
-from src.block import Block
-from src.spike import Spike
-from src.coin import Coin
-from src.portal import Portal
+from src.entities import Block, Spike, Coin, Portal
 from src.constants import SPRITE_SIZE
 
 def load_level_from_csv(filename, group):

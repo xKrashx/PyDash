@@ -3,6 +3,7 @@ import os
 
 from enum import Enum
 
+from src.input_handler import InputHandler
 from src.level_reader import load_level_from_csv
 from src.constants import SCREEN_SIZE, RED, GREEN, BLACK, PURPLE, SPRITE_SIZE, PROJECT_DIR
 from src.obstacle import Obstacle
@@ -18,43 +19,6 @@ class Game:
         PLAYING = 1
         GAME_OVER = 2
 
-    class MenuOption(Enum):
-        RETRY = 0
-        MAIN_MENU = 1
-        QUIT = 2
-        COUNT = 3
-
-        def __int__(self):
-            return self.value
-
-        def __index__(self):
-            return int(self)
-
-        def __eq__(self, other):
-            if isinstance(other, int): return self.value == other
-            if isinstance(other, self.__class__): return self is other
-            return NotImplemented
-
-        def _wrap(self, n: int):
-            return self.__class__(n % self.__class__.COUNT.value)
-
-        def __add__(self, other):
-            if isinstance(other, int): return self._wrap(self.value + other)
-            if isinstance(other, Game.MenuOption): return self._wrap(self.value + other.value)
-            return NotImplemented
-
-        def __radd__(self, other):
-            return self.__add__(other)
-
-        def __sub__(self, other):
-            if isinstance(other, int): return self._wrap(self.value - other)
-            if isinstance(other, Game.MenuOption): return self._wrap(self.value - other.value)
-            return NotImplemented
-
-        def __rsub__(self, other):
-            if isinstance(other, int): return self._wrap(other - self.value)
-            return NotImplemented
-
     def __init__(self):
         pygame.init()
 
@@ -64,6 +28,8 @@ class Game:
 
         pygame.display.set_caption('Pydash: Geometry Dash in Python')
         pygame.display.set_icon(PLAYER_IMAGE)
+
+        self.input_handler = InputHandler(self)
 
         self.clock = pygame.time.Clock()
         self.obstacles_group = pygame.sprite.Group()
@@ -77,7 +43,6 @@ class Game:
         self.state = Game.State.LEVEL_SELECT
         self.available_levels = ["levels/level1.csv", "levels/testing.csv"]
         self.selected_level = 0
-        self.gameover_selection = Game.MenuOption.RETRY
         self.level_complete = False
         self.current_level_path = None
 
@@ -167,33 +132,6 @@ class Game:
             if pygame.sprite.collide_mask(self.player, obstacle):
                 self.collision_checks(obstacle)
 
-    def check_window_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: self.running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    self.running = False
-                    return
-
-                if self.state == Game.State.LEVEL_SELECT:
-                    if event.key == pygame.K_UP: self.selected_level = (self.selected_level - 1) % len(self.available_levels)
-                    elif event.key == pygame.K_DOWN: self.selected_level = (self.selected_level + 1) % len(self.available_levels)
-                    elif event.key == pygame.K_RETURN:
-                        chosen = self.available_levels[self.selected_level]
-                        self.restart(chosen)
-
-                elif self.state == Game.State.GAME_OVER:
-                    if event.key == pygame.K_UP: self.gameover_selection -= 1
-                    elif event.key == pygame.K_DOWN: self.gameover_selection += 1
-                    elif event.key == pygame.K_RETURN:
-                        if self.gameover_selection == Game.MenuOption.RETRY: self.restart(self.current_level_path)
-                        elif self.gameover_selection == Game.MenuOption.MAIN_MENU: self.state = Game.State.LEVEL_SELECT
-                        elif self.gameover_selection == Game.MenuOption.QUIT: self.running = False
-
-                elif self.state == Game.State.PLAYING:
-                    if event.key == pygame.K_TAB: self.debug_view = not self.debug_view
-                    elif self.player.is_dead: self.state = Game.State.GAME_OVER
-
     def draw_mask(self, mask, rect, color=(0, 0, 255, 100)):
         mask_surface = mask.to_surface(setcolor=color, unsetcolor=BLACK)
         mask_surface.set_colorkey(BLACK)
@@ -227,7 +165,7 @@ class Game:
             x = SCREEN_SIZE[0]//2
             y = 220 + i * 60
             color = BLACK
-            if i == self.gameover_selection: pygame.draw.rect(self.screen, (200, 200, 0), (x - 220, y - 24, 440, 48))
+            if i == self.input_handler.gameover_selection: pygame.draw.rect(self.screen, (200, 200, 0), (x - 220, y - 24, 440, 48))
             self.draw_text(opt, self.mid_font, color, x, y)
         self.draw_text(f"Points: {getattr(self, 'points', 0)}", self.small_font, BLACK, SCREEN_SIZE[0]//2, SCREEN_SIZE[1] - 80)
 
@@ -235,7 +173,7 @@ class Game:
         from src.images import BACKGROUND_IMAGE
 
         while self.running:
-            self.check_window_events()
+            self.input_handler.handle_events()
 
             if self.state == Game.State.PLAYING:
                 if not getattr(self, "player", None): self.restart(self.available_levels[self.selected_level])
