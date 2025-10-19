@@ -1,12 +1,17 @@
 import os
 
 # Color definitions (RGBA)
-WHITE = (255, 255, 255, 1)
-BLACK = (0, 0, 0, 1)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
-RED = (255, 0, 0, 1)
-GREEN = (0, 255, 0, 1)
-PURPLE = (255, 0, 255, 1)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+PURPLE = (255, 0, 255)
+LIME = (0, 200, 0)
+DARK_YELLOW = (200, 200, 0)
+
+BLUE_SEMI_TRANSPARENT = (0, 0, 255, 100)
+YELLOW_SEMI_TRANSPARENT = (255, 255, 0, 100)
 
 # Screen and sprite dimensions
 SCREEN_SIZE = (800, 608)

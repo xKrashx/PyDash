@@ -5,7 +5,7 @@ from typing import Tuple
 from src.constants import PROJECT_DIR
 
 class ImageManager:
-    def __init__(self):
+    def __init__(self) -> None:
         self._originals: dict[str, pygame.Surface] = {}
         self._cache: dict[tuple[str, Tuple[int, int]], pygame.Surface] = {}
 

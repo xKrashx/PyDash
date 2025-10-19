@@ -1,5 +1,7 @@
+import pygame
+
 from src.entities.obstacle import Obstacle
 
 class Coin(Obstacle):
-    def __init__(self, image, pos, *groups) -> None:
+    def __init__(self, image: pygame.Surface, pos: pygame.math.Vector2, *groups) -> None:
         super().__init__(image, pos, *groups)
