@@ -46,7 +46,7 @@ class Renderer:
     def draw_level_select_menu(self, available_levels: list[str], selected_level: int) -> None:
         self.draw_text("Select Level", self._big_font, BLACK, SCREEN_SIZE[0] // 2, 120)
         for i, level in enumerate(available_levels):
-            name = os.path.basename(level)
+            name = os.path.basename(level.split(".")[0])
             color = BLACK
             x = SCREEN_SIZE[0] // 2
             y = 220 + i * 60
